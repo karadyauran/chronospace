@@ -7,8 +7,9 @@ import (
 )
 
 type Config struct {
-	EnvType  string `mapstructure:"ENV_TYPE"`
-	DBSource string `mapstructure:"DB_SOURCE"`
+	ServerPort string `mapstructure:"SERVER_PORT"`
+	EnvType    string `mapstructure:"ENV_TYPE"`
+	DBSource   string `mapstructure:"DB_SOURCE"`
 }
 
 func LoadConfig(path string) (config Config, err error) {
