@@ -1,17 +1,40 @@
--- Insert a new user
-INSERT INTO users (username, email, password) 
-VALUES ($1, $2, $3)
-RETURNING *;
+-- name: CreateUser :one
+INSERT INTO users (
+    username,
+    full_name,
+    email,
+    password
+) VALUES (
+    $1, $2, $3, $4
+) RETURNING *;
 
--- Select a user by id
-SELECT * FROM users WHERE id = $1;
+-- name: GetUser :one
+SELECT * FROM users
+WHERE id = $1;
 
--- Update a user by id
-UPDATE users 
-SET username = $2, email = $3, password = $4 
+-- name: GetUserByEmail :one
+SELECT * FROM users
+WHERE email = $1;
+
+-- name: GetUserByUsername :one
+SELECT * FROM users
+WHERE username = $1;
+
+-- name: ListUsers :many
+SELECT * FROM users
+ORDER BY created_at DESC
+LIMIT $1 OFFSET $2;
+
+-- name: UpdateUser :one
+UPDATE users
+SET 
+    username = COALESCE($2, username),
+    full_name = COALESCE($3, full_name),
+    email = COALESCE($4, email),
+    password = COALESCE($5, password)
 WHERE id = $1
 RETURNING *;
 
--- Delete a user by id
-DELETE FROM users WHERE id = $1
-RETURNING *;
+-- name: DeleteUser :exec
+DELETE FROM users
+WHERE id = $1;
