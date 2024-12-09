@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  database:
+    image: postgres:latest
+    container_name: database
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: chronospace
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    image: chronospace-be:latest
+    container_name: backend
+    build:
+      context: ../chronospace-be
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - database
+
+  frontend:
+    image: chronospace-fe:latest
+    container_name: frontend
+    build:
+      context: ../chronospace-fe
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
