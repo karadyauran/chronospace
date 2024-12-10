@@ -6,8 +6,8 @@ type ServiceController struct {
 	ServiceService services.ServiceService
 }
 
-func NewServiceController(service services.ServiceService) *ServiceController {
+func NewServiceController(serviceService services.ServiceService) *ServiceController {
 	return &ServiceController{
-		ServiceService: service,
+		ServiceService: serviceService,
 	}
 }
