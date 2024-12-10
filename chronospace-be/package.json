@@ -4,8 +4,15 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "make build",
+    "start": "nodemon --watch . --exec 'make start' --signal SIGTERM --ext go,json,yaml,sql,env,sh",
+    "dev": "nodemon --watch . --exec 'make start' --signal SIGTERM --ext go,json,yaml,sql,env,sh",
+    "db:generate": "make db-schema",
+    "test:integration": "make test"
   },
   "keywords": [],
-  "author": "karadyauran"
+  "author": "karadyauran",
+  "dependencies": {
+    "nodemon": "^3.1.7"
+  }
 }

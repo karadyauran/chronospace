@@ -12,6 +12,8 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - chronospace-network
 
   backend:
     image: chronospace-be:latest
@@ -19,10 +21,14 @@ services:
     build:
       context: ../chronospace-be
       dockerfile: Dockerfile
+    environment:
+      DB_SOURCE: postgresql://postgres:password@database:5432/chronospace
     ports:
       - "8080:8080"
     depends_on:
       - database
+    networks:
+      - chronospace-network
 
   frontend:
     image: chronospace-fe:latest
@@ -34,6 +40,11 @@ services:
       - "3000:3000"
     depends_on:
       - backend
+    networks:
+      - chronospace-network
 
 volumes:
   postgres_data:
+
+networks:
+  chronospace-network:
