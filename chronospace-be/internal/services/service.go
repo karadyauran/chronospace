@@ -14,7 +14,7 @@ type Service struct {
 	NotificationService *NotificationService
 }
 
-func NewServer(pool *pgxpool.Pool) *Service {
+func NewService(pool *pgxpool.Pool) *Service {
 	queries := db.New(pool)
 	return &Service{
 		AuthService:         NewAuthService(queries),

@@ -2,6 +2,9 @@ package main
 
 import (
 	"chronospace-be/internal/config"
+	"chronospace-be/internal/controllers"
+	"chronospace-be/internal/routers"
+	"chronospace-be/internal/services"
 	"context"
 	"fmt"
 	"log"
@@ -11,7 +14,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/gin-gonic/gin"
+	database "chronospace-be/internal/db"
 )
 
 func main() {
@@ -21,11 +24,22 @@ func main() {
 		os.Exit(1)
 	}
 
-	newRouter := gin.Default()
+	newPool, err := database.NewPostgresDB(&newConfig)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to create connection pool: %v\n", err)
+		os.Exit(1)
+	}
+	defer newPool.Close()
+
+	newService := services.NewService(newPool)
+	newController := controllers.NewController(*newService)
+
+	newRouter := routers.NewRouter(&newConfig, newController)
+	newRouter.SetRoutes()
 
 	newServer := &http.Server{
 		Addr:    ":" + newConfig.ServerPort,
-		Handler: newRouter,
+		Handler: newRouter.Gin,
 	}
 
 	// Start the server in a separate goroutine
