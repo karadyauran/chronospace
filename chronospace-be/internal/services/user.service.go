@@ -7,7 +7,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"go/token"
 	"strings"
 	"time"
 
@@ -32,9 +31,7 @@ type IUserRepository interface {
 	GetUserByUsername(ctx context.Context, username string) (db.User, error)
 	ListUsers(ctx context.Context, arg db.ListUsersParams) ([]db.User, error)
 	UpdateUser(ctx context.Context, arg db.UpdateUserParams) (db.User, error)
-	DeleteUserRefreshToken(ctx context.Context, id pgtype.UUID) (db.User, error)
-	PatchTokenAfterLogin(ctx context.Context, arg db.PatchTokenAfterLoginParams) (db.User, error)
-	UpdateUserRefreshToken(ctx context.Context, arg db.UpdateUserRefreshTokenParams) (db.User, error)
+	UpdateUserToken(ctx context.Context, arg db.UpdateUserTokenParams) (db.UserToken, error)
 }
 
 type UserService struct {
@@ -142,9 +139,9 @@ func (s *UserService) GenerateTokens(ctx context.Context, userID pgtype.UUID) (m
 	}
 
 	// Update refresh token in database
-	_, err = s.userRepo.UpdateUserRefreshToken(ctx, db.UpdateUserRefreshTokenParams{
+	_, err = s.userRepo.UpdateUserToken(ctx, db.UpdateUserTokenParams{
 		ID:                    userID,
-		RefreshToken:          pgtype.Text{String: refreshToken, Valid: true},
+		RefreshToken:          refreshToken,
 		RefreshTokenExpiresAt: pgtype.Timestamp{Time: refreshExpiry, Valid: true},
 	})
 	if err != nil {
