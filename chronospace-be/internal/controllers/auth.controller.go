@@ -2,12 +2,12 @@ package controllers
 
 import "chronospace-be/internal/services"
 
-type AuthController struct {
-	authService services.AuthService
+type UserController struct {
+	userService services.UserService
 }
 
-func NewAuthController(authService services.AuthService) *AuthController {
-	return &AuthController{
-		authService: authService,
+func NewUserController(userService services.UserService) *UserController {
+	return &UserController{
+		userService: userService,
 	}
 }

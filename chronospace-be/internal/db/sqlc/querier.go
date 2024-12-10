@@ -11,20 +11,28 @@ import (
 )
 
 type Querier interface {
+	CountUserTokens(ctx context.Context, userID pgtype.UUID) (int64, error)
 	CreateBooking(ctx context.Context, arg CreateBookingParams) (Booking, error)
 	CreateSchedule(ctx context.Context, arg CreateScheduleParams) (Schedule, error)
 	CreateService(ctx context.Context, arg CreateServiceParams) (Service, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
+	CreateUserToken(ctx context.Context, arg CreateUserTokenParams) (UserToken, error)
 	DeleteBooking(ctx context.Context, id pgtype.UUID) error
+	DeleteExpiredTokens(ctx context.Context) error
 	DeleteSchedule(ctx context.Context, id pgtype.UUID) error
 	DeleteService(ctx context.Context, id pgtype.UUID) error
 	DeleteUser(ctx context.Context, id pgtype.UUID) error
+	DeleteUserToken(ctx context.Context, id pgtype.UUID) error
+	DeleteUserTokensByUserID(ctx context.Context, userID pgtype.UUID) error
 	GetBooking(ctx context.Context, id pgtype.UUID) (Booking, error)
 	GetScheduleByID(ctx context.Context, id pgtype.UUID) (Schedule, error)
 	GetService(ctx context.Context, id pgtype.UUID) (Service, error)
 	GetUser(ctx context.Context, id pgtype.UUID) (User, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserByUsername(ctx context.Context, username string) (User, error)
+	GetUserTokenByID(ctx context.Context, id pgtype.UUID) (UserToken, error)
+	GetUserTokenByRefreshToken(ctx context.Context, refreshToken string) (UserToken, error)
+	GetUserTokensByUserID(ctx context.Context, userID pgtype.UUID) ([]UserToken, error)
 	ListBookings(ctx context.Context) ([]Booking, error)
 	ListBookingsByUser(ctx context.Context, userID pgtype.UUID) ([]Booking, error)
 	ListSchedules(ctx context.Context) ([]Schedule, error)
@@ -35,6 +43,8 @@ type Querier interface {
 	UpdateSchedule(ctx context.Context, arg UpdateScheduleParams) (Schedule, error)
 	UpdateService(ctx context.Context, arg UpdateServiceParams) (Service, error)
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
+	UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) (User, error)
+	UpdateUserToken(ctx context.Context, arg UpdateUserTokenParams) (UserToken, error)
 }
 
 var _ Querier = (*Queries)(nil)

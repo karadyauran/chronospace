@@ -13,10 +13,10 @@ import (
 )
 
 type Router struct {
-	Gin        *gin.Engine
-	config     *config.Config
+	Gin    *gin.Engine
+	config *config.Config
 
-	authRouter *authRouter
+	authRouter *userRouter
 }
 
 func NewRouter(config *config.Config, controller *controllers.Controller) *Router {
@@ -37,13 +37,13 @@ func NewRouter(config *config.Config, controller *controllers.Controller) *Route
 	return &Router{
 		Gin:        ginRouter,
 		config:     config,
-		authRouter: newAuthRouter(controller.AuthController, config),
+		authRouter: newUserRouter(controller.UserController, config),
 	}
 }
 
 func (r *Router) SetRoutes() {
 	api := r.Gin.Group("/v1/api")
-	r.authRouter.setAuthRoutes(api)
+	r.authRouter.setUserRoutes(api)
 
 	if r.config.EnvType != "prod" {
 		r.Gin.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

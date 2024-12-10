@@ -117,8 +117,9 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 
 const listUsers = `-- name: ListUsers :many
 SELECT id, username, full_name, email, password, created_at FROM users
-ORDER BY created_at DESC
-LIMIT $1 OFFSET $2
+ORDER BY created_at
+LIMIT $1
+OFFSET $2
 `
 
 type ListUsersParams struct {
@@ -180,6 +181,32 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 		arg.Email,
 		arg.Password,
 	)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.FullName,
+		&i.Email,
+		&i.Password,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const updateUserPassword = `-- name: UpdateUserPassword :one
+UPDATE users
+SET password = $2
+WHERE id = $1
+RETURNING id, username, full_name, email, password, created_at
+`
+
+type UpdateUserPasswordParams struct {
+	ID       pgtype.UUID `json:"id"`
+	Password string      `json:"password"`
+}
+
+func (q *Queries) UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) (User, error) {
+	row := q.db.QueryRow(ctx, updateUserPassword, arg.ID, arg.Password)
 	var i User
 	err := row.Scan(
 		&i.ID,

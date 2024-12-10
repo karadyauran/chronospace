@@ -41,3 +41,11 @@ type User struct {
 	Password  string           `json:"password"`
 	CreatedAt pgtype.Timestamp `json:"created_at"`
 }
+
+type UserToken struct {
+	ID                    pgtype.UUID      `json:"id"`
+	UserID                pgtype.UUID      `json:"user_id"`
+	RefreshToken          string           `json:"refresh_token"`
+	RefreshTokenExpiresAt pgtype.Timestamp `json:"refresh_token_expires_at"`
+	CreatedAt             pgtype.Timestamp `json:"created_at"`
+}
