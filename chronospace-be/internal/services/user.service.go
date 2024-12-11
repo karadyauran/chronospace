@@ -9,17 +9,8 @@ import (
 	"strings"
 	"time"
 
-	
 	"github.com/jackc/pgx/v5/pgtype"
 	"golang.org/x/crypto/bcrypt"
-)
-
-var (
-	ErrInvalidContex         = errors.New("invalid context")
-	ErrPassword8Symbols      = errors.New("password must be at least 8 characters")
-	ErrInvalidEmailFormat    = errors.New("invalid email format")
-	ErrEmailAlreadyExists    = errors.New("email already exists")
-	ErrUsernameAlreadyExists = errors.New("username already exists")
 )
 
 type IUserRepository interface {
@@ -33,6 +24,14 @@ type IUserRepository interface {
 	UpdateUserToken(ctx context.Context, arg db.UpdateUserTokenParams) (db.UserToken, error)
 }
 
+var (
+	ErrInvalidContex         = errors.New("invalid context")
+	ErrPassword8Symbols      = errors.New("password must be at least 8 characters")
+	ErrInvalidEmailFormat    = errors.New("invalid email format")
+	ErrEmailAlreadyExists    = errors.New("email already exists")
+	ErrUsernameAlreadyExists = errors.New("username already exists")
+)
+
 type UserService struct {
 	userRepo IUserRepository
 }
@@ -43,10 +42,10 @@ func NewUserService(userRepository IUserRepository) *UserService {
 	}
 }
 
-func (s *UserService) RegisterUser(ctx context.Context, params models.CreateUserParams) (db.User, error) {
+func (s *UserService) RegisterUser(ctx context.Context, params models.CreateUserParams) (models.UserCreatedResponse, error) {
 	// Validate context
 	if ctx == nil {
-		return db.User{}, ErrInvalidContex
+		return models.UserCreatedResponse{}, ErrInvalidContex
 	}
 
 	// Trim whitespace from inputs
@@ -55,27 +54,27 @@ func (s *UserService) RegisterUser(ctx context.Context, params models.CreateUser
 
 	// Basic validation
 	if len(params.Password) < 8 {
-		return db.User{}, ErrPassword8Symbols
+		return models.UserCreatedResponse{}, ErrPassword8Symbols
 	}
 
 	if !strings.Contains(params.Email, "@") {
-		return db.User{}, ErrInvalidEmailFormat
+		return models.UserCreatedResponse{}, ErrInvalidEmailFormat
 	}
 
 	// Check if email already exists (using case-insensitive comparison)
 	if _, err := s.userRepo.GetUserByEmail(ctx, strings.ToLower(params.Email)); err == nil {
-		return db.User{}, ErrEmailAlreadyExists
+		return models.UserCreatedResponse{}, ErrEmailAlreadyExists
 	}
 
 	// Check if username already exists (using case-insensitive comparison)
 	if _, err := s.userRepo.GetUserByUsername(ctx, strings.ToLower(params.Username)); err == nil {
-		return db.User{}, ErrUsernameAlreadyExists
+		return models.UserCreatedResponse{}, ErrUsernameAlreadyExists
 	}
 
 	// Use password hashing cost
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(params.Password), bcrypt.DefaultCost+2)
 	if err != nil {
-		return db.User{}, fmt.Errorf("error hashing password: %w", err)
+		return models.UserCreatedResponse{}, fmt.Errorf("error hashing password: %w", err)
 	}
 
 	// Clear the original password from memory
@@ -101,8 +100,10 @@ func (s *UserService) RegisterUser(ctx context.Context, params models.CreateUser
 		Password: params.Password,
 	})
 	if err != nil {
-		return db.User{}, fmt.Errorf("error creating user: %w", err)
+		return models.UserCreatedResponse{}, fmt.Errorf("error creating user: %w", err)
 	}
 
-	return user, nil
+	return models.UserCreatedResponse{
+		Message: "user created successfully",
+	}, nil
 }

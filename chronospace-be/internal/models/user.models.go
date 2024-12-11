@@ -10,3 +10,7 @@ type CreateUserParams struct {
 	RefreshToken          string    `json:"refresh_token"`
 	RefreshTokenExpiresAt time.Time `json:"refresh_token_expires_at"`
 }
+
+type UserCreatedResponse struct {
+	Message     string `json:"message"`
+}
