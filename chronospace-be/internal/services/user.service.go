@@ -3,6 +3,7 @@ package services
 import (
 	db "chronospace-be/internal/db/sqlc"
 	"chronospace-be/internal/models"
+	"chronospace-be/internal/utils"
 	"context"
 	"errors"
 	"fmt"
@@ -105,5 +106,59 @@ func (s *UserService) RegisterUser(ctx context.Context, params models.CreateUser
 
 	return models.UserCreatedResponse{
 		Message: "user created successfully",
+	}, nil
+}
+
+func (s *UserService) LoginUser(ctx context.Context, email, password string) (models.LoginResponse, error) {
+	if ctx == nil {
+		return models.LoginResponse{}, ErrInvalidContex
+	}
+
+	// Trim and normalize email
+	email = strings.ToLower(strings.TrimSpace(email))
+
+	// Basic email validation
+	if !strings.Contains(email, "@") {
+		return models.LoginResponse{}, ErrInvalidEmailFormat
+	}
+
+	// Create timeout context
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	// Get user by email
+	user, err := s.userRepo.GetUserByEmail(ctx, email)
+	if err != nil {
+		return models.LoginResponse{}, fmt.Errorf("invalid credentials")
+	}
+
+	// Compare passwords
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	if err != nil {
+		return models.LoginResponse{}, fmt.Errorf("invalid credentials")
+	}
+
+	// Generate JWT token
+	tokens, err := utils.GenerateTokens(ctx, user.ID)
+	if err != nil {
+		return models.LoginResponse{}, fmt.Errorf("error generating token: %w", err)
+	}
+
+	// Store token in database
+	_, err = s.userRepo.UpdateUserToken(ctx, db.UpdateUserTokenParams{
+		ID:                    user.ID,
+		RefreshToken:          tokens.RefreshToken,
+		RefreshTokenExpiresAt: pgtype.Timestamp{Time: tokens.RefreshExpiry, Valid: true},
+	})
+	if err != nil {
+		return models.LoginResponse{}, fmt.Errorf("error storing token: %w", err)
+	}
+
+	return models.LoginResponse{
+		UserID:      user.ID,
+		Username:    user.Username,
+		Email:       user.Email,
+		FullName:    user.FullName,
+		AccessToken: tokens.AccessToken,
 	}, nil
 }

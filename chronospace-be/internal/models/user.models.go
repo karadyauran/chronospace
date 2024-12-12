@@ -1,6 +1,10 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"github.com/jackc/pgx/v5/pgtype"
+)
 
 type CreateUserParams struct {
 	Username              string    `json:"username"`
@@ -12,5 +16,13 @@ type CreateUserParams struct {
 }
 
 type UserCreatedResponse struct {
-	Message     string `json:"message"`
+	Message string `json:"message"`
+}
+
+type LoginResponse struct {
+	UserID      pgtype.UUID `json:"user_id"`
+	Username    string      `json:"username"`
+	Email       string      `json:"email"`
+	FullName    string      `json:"full_name"`
+	AccessToken string      `json:"access_token"`
 }

@@ -9,7 +9,7 @@ import (
 	"encoding/hex"
 
 	"github.com/golang-jwt/jwt"
-	"github.com/jackc/pgx/pgtype"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func GenerateTokens(ctx context.Context, userID pgtype.UUID) (models.Tokens, error) {
