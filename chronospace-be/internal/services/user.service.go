@@ -93,7 +93,7 @@ func (s *UserService) RegisterUser(ctx context.Context, params models.CreateUser
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	user, err := s.userRepo.CreateUser(ctx, db.CreateUserParams{
+	_, err = s.userRepo.CreateUser(ctx, db.CreateUserParams{
 		Username: params.Username,
 		FullName: params.FullName,
 		Email:    params.Email,
