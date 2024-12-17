@@ -5,13 +5,14 @@ import (
 	"chronospace-be/internal/models"
 	"chronospace-be/internal/utils"
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"golang.org/x/crypto/bcrypt"
+
+	err2 "chronospace-be/internal/models/enums"
 )
 
 type IUserRepository interface {
@@ -24,14 +25,6 @@ type IUserRepository interface {
 	UpdateUser(ctx context.Context, arg db.UpdateUserParams) (db.User, error)
 	UpdateUserToken(ctx context.Context, arg db.UpdateUserTokenParams) (db.UserToken, error)
 }
-
-var (
-	ErrInvalidContex         = errors.New("invalid context")
-	ErrPassword8Symbols      = errors.New("password must be at least 8 characters")
-	ErrInvalidEmailFormat    = errors.New("invalid email format")
-	ErrEmailAlreadyExists    = errors.New("email already exists")
-	ErrUsernameAlreadyExists = errors.New("username already exists")
-)
 
 type UserService struct {
 	userRepo IUserRepository
@@ -46,7 +39,7 @@ func NewUserService(userRepository IUserRepository) *UserService {
 func (s *UserService) RegisterUser(ctx context.Context, params models.CreateUserParams) (models.UserCreatedResponse, error) {
 	// Validate context
 	if ctx == nil {
-		return models.UserCreatedResponse{}, ErrInvalidContex
+		return models.UserCreatedResponse{}, err2.ErrInvalidContex
 	}
 
 	// Trim whitespace from inputs
@@ -55,21 +48,21 @@ func (s *UserService) RegisterUser(ctx context.Context, params models.CreateUser
 
 	// Basic validation
 	if len(params.Password) < 8 {
-		return models.UserCreatedResponse{}, ErrPassword8Symbols
+		return models.UserCreatedResponse{}, err2.ErrPassword8Symbols
 	}
 
 	if !strings.Contains(params.Email, "@") {
-		return models.UserCreatedResponse{}, ErrInvalidEmailFormat
+		return models.UserCreatedResponse{}, err2.ErrInvalidEmailFormat
 	}
 
 	// Check if email already exists (using case-insensitive comparison)
 	if _, err := s.userRepo.GetUserByEmail(ctx, strings.ToLower(params.Email)); err == nil {
-		return models.UserCreatedResponse{}, ErrEmailAlreadyExists
+		return models.UserCreatedResponse{}, err2.ErrEmailAlreadyExists
 	}
 
 	// Check if username already exists (using case-insensitive comparison)
 	if _, err := s.userRepo.GetUserByUsername(ctx, strings.ToLower(params.Username)); err == nil {
-		return models.UserCreatedResponse{}, ErrUsernameAlreadyExists
+		return models.UserCreatedResponse{}, err2.ErrUsernameAlreadyExists
 	}
 
 	// Use password hashing cost
@@ -111,7 +104,7 @@ func (s *UserService) RegisterUser(ctx context.Context, params models.CreateUser
 
 func (s *UserService) LoginUser(ctx context.Context, email, password string) (models.LoginResponse, error) {
 	if ctx == nil {
-		return models.LoginResponse{}, ErrInvalidContex
+		return models.LoginResponse{}, err2.ErrInvalidContex
 	}
 
 	// Trim and normalize email
@@ -119,7 +112,7 @@ func (s *UserService) LoginUser(ctx context.Context, email, password string) (mo
 
 	// Basic email validation
 	if !strings.Contains(email, "@") {
-		return models.LoginResponse{}, ErrInvalidEmailFormat
+		return models.LoginResponse{}, err2.ErrInvalidEmailFormat
 	}
 
 	// Create timeout context
@@ -129,19 +122,19 @@ func (s *UserService) LoginUser(ctx context.Context, email, password string) (mo
 	// Get user by email
 	user, err := s.userRepo.GetUserByEmail(ctx, email)
 	if err != nil {
-		return models.LoginResponse{}, fmt.Errorf("invalid credentials")
+		return models.LoginResponse{}, err2.ErrInvalidCredentials
 	}
 
 	// Compare passwords
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
-		return models.LoginResponse{}, fmt.Errorf("invalid credentials")
+		return models.LoginResponse{}, err2.ErrInvalidCredentials
 	}
 
 	// Generate JWT token
 	tokens, err := utils.GenerateTokens(ctx, user.ID)
 	if err != nil {
-		return models.LoginResponse{}, fmt.Errorf("error generating token: %w", err)
+		return models.LoginResponse{}, err2.ErrGeneratingToken
 	}
 
 	// Store token in database
@@ -151,14 +144,158 @@ func (s *UserService) LoginUser(ctx context.Context, email, password string) (mo
 		RefreshTokenExpiresAt: pgtype.Timestamp{Time: tokens.RefreshExpiry, Valid: true},
 	})
 	if err != nil {
-		return models.LoginResponse{}, fmt.Errorf("error storing token: %w", err)
+		return models.LoginResponse{}, err2.ErrStoringToken
 	}
 
 	return models.LoginResponse{
-		UserID:      user.ID,
-		Username:    user.Username,
-		Email:       user.Email,
-		FullName:    user.FullName,
 		AccessToken: tokens.AccessToken,
 	}, nil
+}
+
+func (s *UserService) LogoutUser(ctx context.Context, userID pgtype.UUID) error {
+	if ctx == nil {
+		return err2.ErrInvalidContex
+	}
+
+	// Create timeout context
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	// Clear the user's refresh token
+	_, err := s.userRepo.UpdateUserToken(ctx, db.UpdateUserTokenParams{
+		ID:                    userID,
+		RefreshToken:          "",
+		RefreshTokenExpiresAt: pgtype.Timestamp{Valid: false},
+	})
+	if err != nil {
+		return err2.ErrCleaningToken
+	}
+
+	return nil
+}
+
+func (s *UserService) GetUser(ctx context.Context, userID pgtype.UUID) (models.UserResponse, error) {
+	if ctx == nil {
+		return models.UserResponse{}, err2.ErrInvalidContex
+	}
+
+	// Create timeout context
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	user, err := s.userRepo.GetUser(ctx, userID)
+	if err != nil {
+		return models.UserResponse{}, err2.ErrUserNotFound
+	}
+
+	return models.UserResponse{
+		ID:       user.ID,
+		Username: user.Username,
+		FullName: user.FullName,
+		Email:    user.Email,
+	}, nil
+}
+
+func (s *UserService) UpdateUser(ctx context.Context, userID pgtype.UUID, params models.UpdateUserParams) (models.UserResponse, error) {
+	if ctx == nil {
+		return models.UserResponse{}, err2.ErrInvalidContex
+	}
+
+	// Trim whitespace from inputs
+	params.Email = strings.TrimSpace(params.Email)
+	params.Username = strings.TrimSpace(params.Username)
+
+	// Basic validation
+	if len(params.Password) > 0 && len(params.Password) < 8 {
+		return models.UserResponse{}, err2.ErrPassword8Symbols
+	}
+
+	if !strings.Contains(params.Email, "@") {
+		return models.UserResponse{}, err2.ErrInvalidEmailFormat
+	}
+
+	// Check if email already exists (using case-insensitive comparison)
+	if _, err := s.userRepo.GetUserByEmail(ctx, strings.ToLower(params.Email)); err == nil {
+		return models.UserResponse{}, err2.ErrEmailAlreadyExists
+	}
+
+	// Check if username already exists (using case-insensitive comparison)
+	if _, err := s.userRepo.GetUserByUsername(ctx, strings.ToLower(params.Username)); err == nil {
+		return models.UserResponse{}, err2.ErrUsernameAlreadyExists
+	}
+
+	// Use password hashing cost if password is provided
+	if len(params.Password) > 0 {
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(params.Password), bcrypt.DefaultCost+2)
+		if err != nil {
+			return models.UserResponse{}, fmt.Errorf("error hashing password: %w", err)
+		}
+		params.Password = string(hashedPassword)
+	}
+
+	// Create timeout context
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	updatedUser, err := s.userRepo.UpdateUser(ctx, db.UpdateUserParams{
+		ID:       userID,
+		Username: params.Username,
+		FullName: params.FullName,
+		Email:    params.Email,
+		Password: params.Password,
+	})
+	if err != nil {
+		return models.UserResponse{}, fmt.Errorf("error updating user: %w", err)
+	}
+
+	return models.UserResponse{
+		ID:       updatedUser.ID,
+		Username: updatedUser.Username,
+		FullName: updatedUser.FullName,
+		Email:    updatedUser.Email,
+	}, nil
+}
+
+func (s *UserService) DeleteUser(ctx context.Context, userID pgtype.UUID) error {
+	if ctx == nil {
+		return err2.ErrInvalidContex
+	}
+
+	// Create timeout context
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	err := s.userRepo.DeleteUser(ctx, userID)
+	if err != nil {
+		return err2.ErrDeletingUser
+	}
+
+	return nil
+}
+
+func (s *UserService) ListUsers(ctx context.Context, params db.ListUsersParams) ([]models.UserResponse, error) {
+	if ctx == nil {
+		return nil, err2.ErrInvalidContex
+	}
+
+	// Create timeout context
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	users, err := s.userRepo.ListUsers(ctx, params)
+	if err != nil {
+		return nil, err2.ErrListingUsers
+	}
+
+	var userResponses []models.UserResponse
+	for _, user := range users {
+		userResponses = append(userResponses, models.UserResponse{
+			ID:       user.ID,
+			Username: user.Username,
+			FullName: user.FullName,
+			Email:    user.Email,
+		})
+	}
+
+	return userResponses, nil
 }

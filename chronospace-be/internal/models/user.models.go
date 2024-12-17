@@ -20,9 +20,19 @@ type UserCreatedResponse struct {
 }
 
 type LoginResponse struct {
-	UserID      pgtype.UUID `json:"user_id"`
-	Username    string      `json:"username"`
-	Email       string      `json:"email"`
-	FullName    string      `json:"full_name"`
-	AccessToken string      `json:"access_token"`
+	AccessToken string `json:"access_token"`
+}
+
+type UpdateUserParams struct {
+	Username string
+	FullName string
+	Email    string
+	Password string
+}
+
+type UserResponse struct {
+	ID       pgtype.UUID `json:"id"`
+	Username string      `json:"username"`
+	FullName string      `json:"full_name"`
+	Email    string      `json:"email"`
 }
