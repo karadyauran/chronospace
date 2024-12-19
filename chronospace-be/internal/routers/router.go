@@ -53,6 +53,9 @@ func NewRouter(config *config.Config, controller *controllers.Controller, jwtMid
 func (r *Router) SetRoutes() {
 	api := r.Gin.Group("/v1/api")
 	r.authRouter.setUserRoutes(api)
+	r.bookingRouter.setBookingRoutes(api)
+	r.scheduleRouter.setScheduleRoutes(api)
+	r.serviceRouter.setServiceRoutes(api)
 
 	if r.config.EnvType != "prod" {
 		r.Gin.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

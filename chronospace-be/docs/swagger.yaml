@@ -1,6 +1,65 @@
 basePath: /
 definitions:
-  models.CreateUserParams:
+  big.Int:
+    type: object
+  chronospace-be_internal_models.Booking:
+    properties:
+      date:
+        $ref: '#/definitions/pgtype.Date'
+      id:
+        type: string
+      service_id:
+        type: string
+      status:
+        type: string
+      time:
+        type: string
+      user_id:
+        type: string
+    type: object
+  chronospace-be_internal_models.CreateBookingParams:
+    properties:
+      date:
+        $ref: '#/definitions/pgtype.Date'
+      service_id:
+        type: string
+      status:
+        type: string
+      time:
+        type: string
+      user_id:
+        type: string
+    type: object
+  chronospace-be_internal_models.CreateScheduleRequest:
+    properties:
+      end_time:
+        type: string
+      start_time:
+        type: string
+    required:
+    - end_time
+    - start_time
+    type: object
+  chronospace-be_internal_models.CreateServiceRequest:
+    properties:
+      description:
+        $ref: '#/definitions/pgtype.Text'
+      location:
+        type: string
+      name:
+        type: string
+      price:
+        $ref: '#/definitions/pgtype.Numeric'
+      type:
+        type: string
+    required:
+    - description
+    - location
+    - name
+    - price
+    - type
+    type: object
+  chronospace-be_internal_models.CreateUserParams:
     properties:
       email:
         type: string
@@ -11,12 +70,12 @@ definitions:
       username:
         type: string
     type: object
-  models.ErrorResponse:
+  chronospace-be_internal_models.ErrorResponse:
     properties:
       error:
         type: string
     type: object
-  models.LoginRequest:
+  chronospace-be_internal_models.LoginRequest:
     properties:
       email:
         type: string
@@ -26,17 +85,74 @@ definitions:
     - email
     - password
     type: object
-  models.LoginResponse:
+  chronospace-be_internal_models.LoginResponse:
     properties:
       access_token:
         type: string
     type: object
-  models.SuccessResponse:
+  chronospace-be_internal_models.ScheduleResponse:
+    properties:
+      id:
+        type: string
+      status:
+        type: string
+      time_end:
+        type: string
+      time_start:
+        type: string
+    type: object
+  chronospace-be_internal_models.ServiceResponse:
+    properties:
+      description:
+        $ref: '#/definitions/pgtype.Text'
+      id:
+        type: string
+      location:
+        type: string
+      name:
+        type: string
+      price:
+        $ref: '#/definitions/pgtype.Numeric'
+      type:
+        type: string
+    type: object
+  chronospace-be_internal_models.SuccessResponse:
     properties:
       message:
         type: string
     type: object
-  models.UpdateUserParams:
+  chronospace-be_internal_models.UpdateBookingParams:
+    properties:
+      date:
+        $ref: '#/definitions/pgtype.Date'
+      id:
+        type: string
+      status:
+        type: string
+      time:
+        type: string
+    type: object
+  chronospace-be_internal_models.UpdateScheduleRequest:
+    properties:
+      end_time:
+        type: string
+      start_time:
+        type: string
+    type: object
+  chronospace-be_internal_models.UpdateServiceRequest:
+    properties:
+      description:
+        $ref: '#/definitions/pgtype.Text'
+      location:
+        type: string
+      name:
+        type: string
+      price:
+        $ref: '#/definitions/pgtype.Numeric'
+      type:
+        type: string
+    type: object
+  chronospace-be_internal_models.UpdateUserParams:
     properties:
       email:
         type: string
@@ -47,12 +163,12 @@ definitions:
       username:
         type: string
     type: object
-  models.UserCreatedResponse:
+  chronospace-be_internal_models.UserCreatedResponse:
     properties:
       message:
         type: string
     type: object
-  models.UserResponse:
+  chronospace-be_internal_models.UserResponse:
     properties:
       email:
         type: string
@@ -62,6 +178,45 @@ definitions:
         type: string
       username:
         type: string
+    type: object
+  pgtype.Date:
+    properties:
+      infinityModifier:
+        $ref: '#/definitions/pgtype.InfinityModifier'
+      time:
+        type: string
+      valid:
+        type: boolean
+    type: object
+  pgtype.InfinityModifier:
+    enum:
+    - 1
+    - 0
+    - -1
+    type: integer
+    x-enum-varnames:
+    - Infinity
+    - Finite
+    - NegativeInfinity
+  pgtype.Numeric:
+    properties:
+      exp:
+        type: integer
+      infinityModifier:
+        $ref: '#/definitions/pgtype.InfinityModifier'
+      int:
+        $ref: '#/definitions/big.Int'
+      naN:
+        type: boolean
+      valid:
+        type: boolean
+    type: object
+  pgtype.Text:
+    properties:
+      string:
+        type: string
+      valid:
+        type: boolean
     type: object
 host: localhost:8080
 info:
@@ -76,6 +231,431 @@ info:
   title: Chronospace API
   version: "1.0"
 paths:
+  /bookings:
+    get:
+      consumes:
+      - application/json
+      description: Get all bookings
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/chronospace-be_internal_models.Booking'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/chronospace-be_internal_models.ErrorResponse'
+      summary: List all bookings
+      tags:
+      - Booking
+    post:
+      consumes:
+      - application/json
+      description: Create a new booking
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Booking details
+        in: body
+        name: booking
+        required: true
+        schema:
+          $ref: '#/definitions/chronospace-be_internal_models.CreateBookingParams'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/chronospace-be_internal_models.Booking'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/chronospace-be_internal_models.ErrorResponse'
+      summary: Create booking
+      tags:
+      - Booking
+  /bookings/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a booking
+      parameters:
+      - description: Booking ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/chronospace-be_internal_models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/chronospace-be_internal_models.ErrorResponse'
+      summary: Delete booking
+      tags:
+      - Booking
+    get:
+      consumes:
+      - application/json
+      description: Get booking by ID
+      parameters:
+      - description: Booking ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/chronospace-be_internal_models.Booking'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/chronospace-be_internal_models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/chronospace-be_internal_models.ErrorResponse'
+      summary: Get booking
+      tags:
+      - Booking
+    put:
+      consumes:
+      - application/json
+      description: Update an existing booking
+      parameters:
+      - description: Booking ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Booking details
+        in: body
+        name: booking
+        required: true
+        schema:
+          $ref: '#/definitions/chronospace-be_internal_models.UpdateBookingParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/chronospace-be_internal_models.Booking'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/chronospace-be_internal_models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/chronospace-be_internal_models.ErrorResponse'
+      summary: Update booking
+      tags:
+      - Booking
+  /bookings/user:
+    get:
+      consumes:
+      - application/json
+      description: Get all bookings for the authenticated user
+      parameters:
+      - description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/chronospace-be_internal_models.Booking'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/chronospace-be_internal_models.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/chronospace-be_internal_models.ErrorResponse'
+      summary: List user bookings
+      tags:
+      - Booking
+  /schedules:
+    get:
+      description: Get a list of all schedules
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/chronospace-be_internal_models.ScheduleResponse'
+            type: array
+      summary: List all schedules
+      tags:
+      - schedules
+    post:
+      consumes:
+      - application/json
+      description: Create a new schedule with the given time range
+      parameters:
+      - description: Schedule details
+        in: body
+        name: schedule
+        required: true
+        schema:
+          $ref: '#/definitions/chronospace-be_internal_models.CreateScheduleRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/chronospace-be_internal_models.ScheduleResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/chronospace-be_internal_models.ErrorResponse'
+      summary: Create a new schedule
+      tags:
+      - schedules
+  /schedules/{id}:
+    delete:
+      description: Delete a schedule by its ID
+      parameters:
+      - description: Schedule ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/chronospace-be_internal_models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/chronospace-be_internal_models.ErrorResponse'
+      summary: Delete a schedule
+      tags:
+      - schedules
+    get:
+      description: Get schedule details by its ID
+      parameters:
+      - description: Schedule ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/chronospace-be_internal_models.ScheduleResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/chronospace-be_internal_models.ErrorResponse'
+      summary: Get a schedule by ID
+      tags:
+      - schedules
+    put:
+      consumes:
+      - application/json
+      description: Update a schedule's details by its ID
+      parameters:
+      - description: Schedule ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Schedule details
+        in: body
+        name: schedule
+        required: true
+        schema:
+          $ref: '#/definitions/chronospace-be_internal_models.UpdateScheduleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/chronospace-be_internal_models.ScheduleResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/chronospace-be_internal_models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/chronospace-be_internal_models.ErrorResponse'
+      summary: Update a schedule
+      tags:
+      - schedules
+  /services:
+    get:
+      consumes:
+      - application/json
+      description: Get all services
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/chronospace-be_internal_models.ServiceResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/chronospace-be_internal_models.ErrorResponse'
+      summary: List services
+      tags:
+      - Service
+    post:
+      consumes:
+      - application/json
+      description: Create a new service
+      parameters:
+      - description: Service details
+        in: body
+        name: service
+        required: true
+        schema:
+          $ref: '#/definitions/chronospace-be_internal_models.CreateServiceRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/chronospace-be_internal_models.ServiceResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/chronospace-be_internal_models.ErrorResponse'
+      summary: Create service
+      tags:
+      - Service
+  /services/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a service
+      parameters:
+      - description: Service ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/chronospace-be_internal_models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/chronospace-be_internal_models.ErrorResponse'
+      summary: Delete service
+      tags:
+      - Service
+    get:
+      consumes:
+      - application/json
+      description: Get service by ID
+      parameters:
+      - description: Service ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/chronospace-be_internal_models.ServiceResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/chronospace-be_internal_models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/chronospace-be_internal_models.ErrorResponse'
+      summary: Get service
+      tags:
+      - Service
+    put:
+      consumes:
+      - application/json
+      description: Update an existing service
+      parameters:
+      - description: Service ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Service details
+        in: body
+        name: service
+        required: true
+        schema:
+          $ref: '#/definitions/chronospace-be_internal_models.UpdateServiceRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/chronospace-be_internal_models.ServiceResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/chronospace-be_internal_models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/chronospace-be_internal_models.ErrorResponse'
+      summary: Update service
+      tags:
+      - Service
   /v1/api/users:
     get:
       description: Get a list of users with pagination
@@ -95,12 +675,12 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/models.UserResponse'
+              $ref: '#/definitions/chronospace-be_internal_models.UserResponse'
             type: array
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/chronospace-be_internal_models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: List users
@@ -121,11 +701,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.SuccessResponse'
+            $ref: '#/definitions/chronospace-be_internal_models.SuccessResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/chronospace-be_internal_models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Delete user
@@ -145,11 +725,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.UserResponse'
+            $ref: '#/definitions/chronospace-be_internal_models.UserResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/chronospace-be_internal_models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Get user profile
@@ -170,18 +750,18 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/models.UpdateUserParams'
+          $ref: '#/definitions/chronospace-be_internal_models.UpdateUserParams'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.UserResponse'
+            $ref: '#/definitions/chronospace-be_internal_models.UserResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/chronospace-be_internal_models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Update user profile
@@ -198,18 +778,18 @@ paths:
         name: credentials
         required: true
         schema:
-          $ref: '#/definitions/models.LoginRequest'
+          $ref: '#/definitions/chronospace-be_internal_models.LoginRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.LoginResponse'
+            $ref: '#/definitions/chronospace-be_internal_models.LoginResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/chronospace-be_internal_models.ErrorResponse'
       summary: User login
       tags:
       - users
@@ -222,11 +802,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.SuccessResponse'
+            $ref: '#/definitions/chronospace-be_internal_models.SuccessResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/chronospace-be_internal_models.ErrorResponse'
       security:
       - BearerAuth: []
       summary: User logout
@@ -243,18 +823,18 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/models.CreateUserParams'
+          $ref: '#/definitions/chronospace-be_internal_models.CreateUserParams'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/models.UserCreatedResponse'
+            $ref: '#/definitions/chronospace-be_internal_models.UserCreatedResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/models.ErrorResponse'
+            $ref: '#/definitions/chronospace-be_internal_models.ErrorResponse'
       summary: Register new user
       tags:
       - users
