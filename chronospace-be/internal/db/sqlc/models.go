@@ -30,6 +30,7 @@ type Service struct {
 	ID          pgtype.UUID    `json:"id"`
 	Name        string         `json:"name"`
 	Description pgtype.Text    `json:"description"`
+	Location    string         `json:"location"`
 	Price       pgtype.Numeric `json:"price"`
 }
 

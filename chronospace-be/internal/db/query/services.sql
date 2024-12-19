@@ -2,9 +2,10 @@
 INSERT INTO services (
     name,
     description,
+    location, 
     price
 ) VALUES (
-    $1, $2, $3
+    $1, $2, $3, $4
 ) RETURNING *;
 
 -- name: GetService :one
@@ -19,7 +20,8 @@ ORDER BY name;
 UPDATE services
 SET name = $2,
     description = $3,
-    price = $4
+    location = $4,
+    price = $5
 WHERE id = $1
 RETURNING *;
 

@@ -12,6 +12,7 @@ type Config struct {
 	EnvType       string `mapstructure:"ENV_TYPE"`
 	DBSource      string `mapstructure:"DB_SOURCE"`
 	SecretKey     string `mapstructure:"SECRET_KEY"`
+	GoogleAPI     string `mapstructure:"GOOGLE_API"`
 }
 
 func LoadConfig(path string) (config Config, err error) {

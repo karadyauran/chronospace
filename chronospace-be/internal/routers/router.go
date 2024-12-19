@@ -22,6 +22,7 @@ type Router struct {
 	authRouter     *userRouter
 	bookingRouter  *bookingRouter
 	scheduleRouter *scheduleRouter
+	serviceRouter  *serviceRouter
 }
 
 func NewRouter(config *config.Config, controller *controllers.Controller, jwtMiddleware *middleware.JWTConfig) *Router {
@@ -45,6 +46,7 @@ func NewRouter(config *config.Config, controller *controllers.Controller, jwtMid
 		authRouter:     newUserRouter(controller.UserController, config, jwtMiddleware),
 		bookingRouter:  newBookingRouter(controller.BookingController, config, jwtMiddleware),
 		scheduleRouter: newScheduleRouter(controller.ScheduleController, config, jwtMiddleware),
+		serviceRouter: newServiceRouter(controller.ServiceController, config, jwtMiddleware),
 	}
 }
 

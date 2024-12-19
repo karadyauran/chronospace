@@ -5,6 +5,12 @@ go 1.23
 require github.com/spf13/viper v1.19.0
 
 require (
+	github.com/google/uuid v1.4.0 // indirect
+	go.opencensus.io v0.24.0 // indirect
+	golang.org/x/time v0.5.0 // indirect
+)
+
+require (
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/go-openapi/jsonpointer v0.21.0 // indirect
@@ -75,6 +81,7 @@ require (
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9 // indirect
 	golang.org/x/sys v0.28.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
+	googlemaps.github.io/maps v1.7.0
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

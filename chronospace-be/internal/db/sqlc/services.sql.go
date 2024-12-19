@@ -15,25 +15,33 @@ const createService = `-- name: CreateService :one
 INSERT INTO services (
     name,
     description,
+    location, 
     price
 ) VALUES (
-    $1, $2, $3
-) RETURNING id, name, description, price
+    $1, $2, $3, $4
+) RETURNING id, name, description, location, price
 `
 
 type CreateServiceParams struct {
 	Name        string         `json:"name"`
 	Description pgtype.Text    `json:"description"`
+	Location    string         `json:"location"`
 	Price       pgtype.Numeric `json:"price"`
 }
 
 func (q *Queries) CreateService(ctx context.Context, arg CreateServiceParams) (Service, error) {
-	row := q.db.QueryRow(ctx, createService, arg.Name, arg.Description, arg.Price)
+	row := q.db.QueryRow(ctx, createService,
+		arg.Name,
+		arg.Description,
+		arg.Location,
+		arg.Price,
+	)
 	var i Service
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
 		&i.Description,
+		&i.Location,
 		&i.Price,
 	)
 	return i, err
@@ -50,7 +58,7 @@ func (q *Queries) DeleteService(ctx context.Context, id pgtype.UUID) error {
 }
 
 const getService = `-- name: GetService :one
-SELECT id, name, description, price FROM services
+SELECT id, name, description, location, price FROM services
 WHERE id = $1
 `
 
@@ -61,13 +69,14 @@ func (q *Queries) GetService(ctx context.Context, id pgtype.UUID) (Service, erro
 		&i.ID,
 		&i.Name,
 		&i.Description,
+		&i.Location,
 		&i.Price,
 	)
 	return i, err
 }
 
 const listServices = `-- name: ListServices :many
-SELECT id, name, description, price FROM services
+SELECT id, name, description, location, price FROM services
 ORDER BY name
 `
 
@@ -84,6 +93,7 @@ func (q *Queries) ListServices(ctx context.Context) ([]Service, error) {
 			&i.ID,
 			&i.Name,
 			&i.Description,
+			&i.Location,
 			&i.Price,
 		); err != nil {
 			return nil, err
@@ -100,15 +110,17 @@ const updateService = `-- name: UpdateService :one
 UPDATE services
 SET name = $2,
     description = $3,
-    price = $4
+    location = $4,
+    price = $5
 WHERE id = $1
-RETURNING id, name, description, price
+RETURNING id, name, description, location, price
 `
 
 type UpdateServiceParams struct {
 	ID          pgtype.UUID    `json:"id"`
 	Name        string         `json:"name"`
 	Description pgtype.Text    `json:"description"`
+	Location    string         `json:"location"`
 	Price       pgtype.Numeric `json:"price"`
 }
 
@@ -117,6 +129,7 @@ func (q *Queries) UpdateService(ctx context.Context, arg UpdateServiceParams) (S
 		arg.ID,
 		arg.Name,
 		arg.Description,
+		arg.Location,
 		arg.Price,
 	)
 	var i Service
@@ -124,6 +137,7 @@ func (q *Queries) UpdateService(ctx context.Context, arg UpdateServiceParams) (S
 		&i.ID,
 		&i.Name,
 		&i.Description,
+		&i.Location,
 		&i.Price,
 	)
 	return i, err

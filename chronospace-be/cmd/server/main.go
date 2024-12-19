@@ -38,7 +38,6 @@ import (
 	database "chronospace-be/internal/db"
 )
 
-
 func main() {
 	newConfig, err := config.LoadConfig("./")
 	if err != nil {
@@ -53,7 +52,7 @@ func main() {
 	}
 	defer newPool.Close()
 
-	newService := services.NewService(newPool, newConfig.SecretKey)
+	newService := services.NewService(newPool, newConfig.SecretKey, newConfig.GoogleAPI)
 	newController := controllers.NewController(*newService)
 
 	jwtMiddleware := middleware.NewJWTMiddleware(newConfig.SecretKey)
