@@ -3,6 +3,7 @@ package routers
 import (
 	"chronospace-be/internal/config"
 	"chronospace-be/internal/controllers"
+	"chronospace-be/internal/middleware"
 	"fmt"
 	"net/http"
 
@@ -10,6 +11,8 @@ import (
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+
+	_ "chronospace-be/docs"
 )
 
 type Router struct {
@@ -19,7 +22,7 @@ type Router struct {
 	authRouter *userRouter
 }
 
-func NewRouter(config *config.Config, controller *controllers.Controller) *Router {
+func NewRouter(config *config.Config, controller *controllers.Controller, jwtMiddleware *middleware.JWTConfig) *Router {
 	ginRouter := gin.Default()
 
 	ginRouter.Use(cors.New(cors.Config{
@@ -37,7 +40,7 @@ func NewRouter(config *config.Config, controller *controllers.Controller) *Route
 	return &Router{
 		Gin:        ginRouter,
 		config:     config,
-		authRouter: newUserRouter(controller.UserController, config),
+		authRouter: newUserRouter(controller.UserController, config, jwtMiddleware),
 	}
 }
 

@@ -7,6 +7,7 @@
     "build": "make build",
     "start": "nodemon --watch . --exec 'make start' --signal SIGTERM --ext go,json,yaml,sql,env,sh",
     "dev": "nodemon --watch . --exec 'make start' --signal SIGTERM --ext go,json,yaml,sql,env,sh",
+    "swag:generate": "make swag",
     "db:generate": "make db-schema",
     "test:integration": "make test"
   },

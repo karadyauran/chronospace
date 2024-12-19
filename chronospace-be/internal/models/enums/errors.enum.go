@@ -12,7 +12,7 @@ var (
 	ErrEmailAlreadyExists    = errors.New("email already exists")
 	ErrUsernameAlreadyExists = errors.New("username already exists")
 	ErrGeneratingToken       = errors.New("error generationg token")
-	ErrStoringToken          = errors.New("error storing token")
+	ErrStoringToken          = "error storing token: %s"
 	ErrCleaningToken         = errors.New("error cleaning token")
 	ErrDeletingUser          = errors.New("cannot to delete user")
 	ErrListingUsers          = errors.New("listing users currently not possible")

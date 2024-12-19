@@ -12,7 +12,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func GenerateTokens(ctx context.Context, userID pgtype.UUID) (models.Tokens, error) {
+func GenerateTokens(ctx context.Context, userID pgtype.UUID, secretKey string) (models.Tokens, error) {
 	// Set expiry times
 	accessExpiry := time.Now().Add(15 * time.Minute)
 	refreshExpiry := time.Now().Add(7 * 24 * time.Hour)
@@ -31,26 +31,16 @@ func GenerateTokens(ctx context.Context, userID pgtype.UUID) (models.Tokens, err
 		"type":    "refresh",
 	}
 
-	// Sign tokens with secret key
-	accessToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims).SignedString([]byte("your-secret-key"))
+	// Sign tokens with secret key from config
+	accessToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims).SignedString([]byte(secretKey))
 	if err != nil {
 		return models.Tokens{}, fmt.Errorf("error generating access token: %w", err)
 	}
 
-	refreshToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims).SignedString([]byte("your-secret-key"))
+	refreshToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims).SignedString([]byte(secretKey))
 	if err != nil {
 		return models.Tokens{}, fmt.Errorf("error generating refresh token: %w", err)
 	}
-
-	// // Update refresh token in database
-	// _, err = s.userRepo.UpdateUserToken(ctx, db.UpdateUserTokenParams{
-	// 	ID:                    userID,
-	// 	RefreshToken:          refreshToken,
-	// 	RefreshTokenExpiresAt: pgtype.Timestamp{Time: refreshExpiry, Valid: true},
-	// })
-	// if err != nil {
-	// 	return models.Tokens{}, fmt.Errorf("error updating refresh token: %w", err)
-	// }
 
 	return models.Tokens{
 		AccessToken:   accessToken,

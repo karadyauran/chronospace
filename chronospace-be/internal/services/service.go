@@ -14,10 +14,10 @@ type Service struct {
 	NotificationService *NotificationService
 }
 
-func NewService(pool *pgxpool.Pool) *Service {
+func NewService(pool *pgxpool.Pool, secretKey string) *Service {
 	queries := db.New(pool)
 	return &Service{
-		UserService:         NewUserService(queries),
+		UserService:         NewUserService(queries, secretKey),
 		BookingService:      NewBookingService(queries),
 		ServiceService:      NewServiceService(queries),
 		ScheduleService:     NewScheduleService(queries),

@@ -17,6 +17,7 @@ import (
 
 type IUserRepository interface {
 	CreateUser(ctx context.Context, arg db.CreateUserParams) (db.User, error)
+	CreateUserToken(ctx context.Context, arg db.CreateUserTokenParams) (db.UserToken, error)
 	DeleteUser(ctx context.Context, id pgtype.UUID) error
 	GetUser(ctx context.Context, id pgtype.UUID) (db.User, error)
 	GetUserByEmail(ctx context.Context, email string) (db.User, error)
@@ -27,12 +28,14 @@ type IUserRepository interface {
 }
 
 type UserService struct {
-	userRepo IUserRepository
+	userRepo  IUserRepository
+	secretKey string
 }
 
-func NewUserService(userRepository IUserRepository) *UserService {
+func NewUserService(userRepository IUserRepository, secretKey string) *UserService {
 	return &UserService{
 		userRepo: userRepository,
+		secretKey: secretKey,
 	}
 }
 
@@ -132,7 +135,7 @@ func (s *UserService) LoginUser(ctx context.Context, email, password string) (mo
 	}
 
 	// Generate JWT token
-	tokens, err := utils.GenerateTokens(ctx, user.ID)
+	tokens, err := utils.GenerateTokens(ctx, user.ID, s.secretKey)
 	if err != nil {
 		return models.LoginResponse{}, err2.ErrGeneratingToken
 	}
@@ -144,7 +147,15 @@ func (s *UserService) LoginUser(ctx context.Context, email, password string) (mo
 		RefreshTokenExpiresAt: pgtype.Timestamp{Time: tokens.RefreshExpiry, Valid: true},
 	})
 	if err != nil {
-		return models.LoginResponse{}, err2.ErrStoringToken
+		// If no record exists, create a new one
+		_, err = s.userRepo.CreateUserToken(ctx, db.CreateUserTokenParams{
+			UserID:                user.ID,
+			RefreshToken:          tokens.RefreshToken,
+			RefreshTokenExpiresAt: pgtype.Timestamp{Time: tokens.RefreshExpiry, Valid: true},
+		})
+		if err != nil {
+			return models.LoginResponse{}, fmt.Errorf(err2.ErrStoringToken, err)
+		}
 	}
 
 	return models.LoginResponse{

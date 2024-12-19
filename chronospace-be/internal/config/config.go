@@ -11,6 +11,7 @@ type Config struct {
 	ServerPort    string `mapstructure:"SERVER_PORT"`
 	EnvType       string `mapstructure:"ENV_TYPE"`
 	DBSource      string `mapstructure:"DB_SOURCE"`
+	SecretKey     string `mapstructure:"SECRET_KEY"`
 }
 
 func LoadConfig(path string) (config Config, err error) {

@@ -1,8 +1,29 @@
+// main.go
+//
+// Package main is the entry point for the Chronospace backend server.
+//
+// @title Chronospace API
+// @version 1.0
+// @description This is the backend server for the Chronospace application.
+//
+// @contact.name API Support
+// @contact.url http://www.chronospace.com/support
+// @contact.email support@chronospace.com
+//
+// @license.name Apache 2.0
+// @license.url https://www.apache.org/licenses/LICENSE-2.0.html
+//
+// @host localhost:8080
+// @BasePath /
+//
+// The main function initializes the configuration, database connection, services, controllers, middleware, and routers.
+// It also starts the HTTP server and handles graceful shutdown on interrupt signals.
 package main
 
 import (
 	"chronospace-be/internal/config"
 	"chronospace-be/internal/controllers"
+	"chronospace-be/internal/middleware"
 	"chronospace-be/internal/routers"
 	"chronospace-be/internal/services"
 	"context"
@@ -16,6 +37,7 @@ import (
 
 	database "chronospace-be/internal/db"
 )
+
 
 func main() {
 	newConfig, err := config.LoadConfig("./")
@@ -31,10 +53,12 @@ func main() {
 	}
 	defer newPool.Close()
 
-	newService := services.NewService(newPool)
+	newService := services.NewService(newPool, newConfig.SecretKey)
 	newController := controllers.NewController(*newService)
 
-	newRouter := routers.NewRouter(&newConfig, newController)
+	jwtMiddleware := middleware.NewJWTMiddleware(newConfig.SecretKey)
+
+	newRouter := routers.NewRouter(&newConfig, newController, jwtMiddleware)
 	newRouter.SetRoutes()
 
 	newServer := &http.Server{
