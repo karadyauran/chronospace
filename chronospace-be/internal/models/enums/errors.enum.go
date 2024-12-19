@@ -17,4 +17,7 @@ var (
 	ErrDeletingUser          = errors.New("cannot to delete user")
 	ErrListingUsers          = errors.New("listing users currently not possible")
 	ErrUserNotFound          = errors.New("no user")
+
+	ErrBookingInvalidInput     = errors.New("invalid input")
+	ErrBookingInvalidDateRange = errors.New("invalid date range")
 )
