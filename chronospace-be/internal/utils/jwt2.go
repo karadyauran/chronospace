@@ -3,12 +3,13 @@ package utils
 import (
 	"chronospace-be/internal/models"
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
 	"encoding/hex"
 
-	"github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -48,4 +49,20 @@ func GenerateTokens(ctx context.Context, userID pgtype.UUID, secretKey string) (
 		AccessExpiry:  accessExpiry,
 		RefreshExpiry: refreshExpiry,
 	}, nil
+}
+
+type Claims struct {
+	ID string `json:"id"`
+	jwt.RegisteredClaims
+}
+
+func ParseToken(tokenString string) (*Claims, error) {
+	claims := &Claims{}
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+		return []byte("your-secret-key"), nil // Replace with your actual secret key
+	})
+	if err != nil || !token.Valid {
+		return nil, errors.New("invalid token")
+	}
+	return claims, nil
 }

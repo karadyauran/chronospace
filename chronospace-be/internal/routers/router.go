@@ -19,7 +19,8 @@ type Router struct {
 	Gin    *gin.Engine
 	config *config.Config
 
-	authRouter *userRouter
+	authRouter    *userRouter
+	bookingRouter *bookingRouter
 }
 
 func NewRouter(config *config.Config, controller *controllers.Controller, jwtMiddleware *middleware.JWTConfig) *Router {
@@ -38,9 +39,10 @@ func NewRouter(config *config.Config, controller *controllers.Controller, jwtMid
 	})
 
 	return &Router{
-		Gin:        ginRouter,
-		config:     config,
-		authRouter: newUserRouter(controller.UserController, config, jwtMiddleware),
+		Gin:           ginRouter,
+		config:        config,
+		authRouter:    newUserRouter(controller.UserController, config, jwtMiddleware),
+		bookingRouter: newBookingRouter(controller.BookingController, config, jwtMiddleware),
 	}
 }
 
