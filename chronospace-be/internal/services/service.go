@@ -12,6 +12,7 @@ type Service struct {
 	ServiceService      *ServiceService
 	ScheduleService     *ScheduleService
 	NotificationService *NotificationService
+	MapsService         *MapsService
 }
 
 func NewService(pool *pgxpool.Pool, secretKey string, gmapsKey string) *Service {
@@ -23,5 +24,6 @@ func NewService(pool *pgxpool.Pool, secretKey string, gmapsKey string) *Service 
 		ServiceService:      NewServiceService(queries, *NewMapsService(gmapsKey)),
 		ScheduleService:     NewScheduleService(queries),
 		NotificationService: NewNotificationService(),
+		MapsService:         NewMapsService(gmapsKey),
 	}
 }

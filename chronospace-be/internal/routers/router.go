@@ -23,6 +23,7 @@ type Router struct {
 	bookingRouter  *bookingRouter
 	scheduleRouter *scheduleRouter
 	serviceRouter  *serviceRouter
+	mapsRouter     *mapsRouter
 }
 
 func NewRouter(config *config.Config, controller *controllers.Controller, jwtMiddleware *middleware.JWTConfig) *Router {
@@ -46,7 +47,8 @@ func NewRouter(config *config.Config, controller *controllers.Controller, jwtMid
 		authRouter:     newUserRouter(controller.UserController, config, jwtMiddleware),
 		bookingRouter:  newBookingRouter(controller.BookingController, config, jwtMiddleware),
 		scheduleRouter: newScheduleRouter(controller.ScheduleController, config, jwtMiddleware),
-		serviceRouter: newServiceRouter(controller.ServiceController, config, jwtMiddleware),
+		serviceRouter:  newServiceRouter(controller.ServiceController, config, jwtMiddleware),
+		mapsRouter:     newMapsRouter(controller.MapsController, config, jwtMiddleware),
 	}
 }
 
@@ -56,6 +58,7 @@ func (r *Router) SetRoutes() {
 	r.bookingRouter.setBookingRoutes(api)
 	r.scheduleRouter.setScheduleRoutes(api)
 	r.serviceRouter.setServiceRoutes(api)
+	r.mapsRouter.setMapsRoutes(api)
 
 	if r.config.EnvType != "prod" {
 		r.Gin.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
