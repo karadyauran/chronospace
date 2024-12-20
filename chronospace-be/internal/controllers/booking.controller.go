@@ -28,7 +28,7 @@ func NewBookingController(bookingService services.BookingService) *BookingContro
 // @Param booking body models.CreateBookingParams true "Booking details"
 // @Success 201 {object} models.Booking
 // @Failure 400 {object} models.ErrorResponse
-// @Router /bookings [post]
+// @Router /v1/api/bookings [post]
 func (c *BookingController) CreateBooking(ctx *gin.Context) {
 	userID, err := utils.GetUserIDFromContext(ctx)
 	if err != nil {
@@ -60,7 +60,7 @@ func (c *BookingController) CreateBooking(ctx *gin.Context) {
 // @Param id path string true "Booking ID"
 // @Success 200 {object} models.Booking
 // @Failure 400,404 {object} models.ErrorResponse
-// @Router /bookings/{id} [get]
+// @Router /v1/api/bookings/{id} [get]
 func (c *BookingController) GetBooking(ctx *gin.Context) {
 	id, err := utils.ParseUUID(ctx.Param("id"))
 	if err != nil {
@@ -84,7 +84,7 @@ func (c *BookingController) GetBooking(ctx *gin.Context) {
 // @Produce json
 // @Success 200 {array} models.Booking
 // @Failure 400 {object} models.ErrorResponse
-// @Router /bookings [get]
+// @Router /v1/api/bookings [get]
 func (c *BookingController) ListBookings(ctx *gin.Context) {
 	bookings, err := c.bookingService.ListBookings(ctx)
 	if err != nil {
@@ -103,7 +103,7 @@ func (c *BookingController) ListBookings(ctx *gin.Context) {
 // @Param Authorization header string true "Bearer token"
 // @Success 200 {array} models.Booking
 // @Failure 400,401 {object} models.ErrorResponse
-// @Router /bookings/user [get]
+// @Router /v1/api/bookings/user [get]
 func (c *BookingController) ListUserBookings(ctx *gin.Context) {
 	userID, err := utils.GetUserIDFromContext(ctx)
 	if err != nil {
@@ -129,7 +129,7 @@ func (c *BookingController) ListUserBookings(ctx *gin.Context) {
 // @Param booking body models.UpdateBookingParams true "Booking details"
 // @Success 200 {object} models.Booking
 // @Failure 400,404 {object} models.ErrorResponse
-// @Router /bookings/{id} [put]
+// @Router /v1/api/bookings/{id} [put]
 func (c *BookingController) UpdateBooking(ctx *gin.Context) {
 	id, err := utils.ParseUUID(ctx.Param("id"))
 	if err != nil {
@@ -161,7 +161,7 @@ func (c *BookingController) UpdateBooking(ctx *gin.Context) {
 // @Param id path string true "Booking ID"
 // @Success 204 "No Content"
 // @Failure 400,404 {object} models.ErrorResponse
-// @Router /bookings/{id} [delete]
+// @Router /v1/api/bookings/{id} [delete]
 func (c *BookingController) DeleteBooking(ctx *gin.Context) {
 	id, err := utils.ParseUUID(ctx.Param("id"))
 	if err != nil {

@@ -17,7 +17,42 @@
     "host": "localhost:8080",
     "basePath": "/",
     "paths": {
-        "/bookings": {
+        "/schedules/{id}": {
+            "delete": {
+                "description": "Delete a schedule by its ID",
+                "tags": [
+                    "schedules"
+                ],
+                "summary": "Delete a schedule",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Schedule ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/chronospace-be_internal_models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/chronospace-be_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/api/bookings": {
             "get": {
                 "description": "Get all bookings",
                 "consumes": [
@@ -94,7 +129,7 @@
                 }
             }
         },
-        "/bookings/user": {
+        "/v1/api/bookings/user": {
             "get": {
                 "description": "Get all bookings for the authenticated user",
                 "consumes": [
@@ -141,7 +176,7 @@
                 }
             }
         },
-        "/bookings/{id}": {
+        "/v1/api/bookings/{id}": {
             "get": {
                 "description": "Get booking by ID",
                 "consumes": [
@@ -275,7 +310,7 @@
                 }
             }
         },
-        "/maps/search": {
+        "/v1/api/maps/search": {
             "get": {
                 "description": "Search for places using Google Maps API",
                 "consumes": [
@@ -305,7 +340,7 @@
                 }
             }
         },
-        "/schedules": {
+        "/v1/api/schedules": {
             "get": {
                 "description": "Get a list of all schedules",
                 "produces": [
@@ -366,7 +401,7 @@
                 }
             }
         },
-        "/schedules/{id}": {
+        "/v1/api/schedules/{id}": {
             "get": {
                 "description": "Get schedule details by its ID",
                 "produces": [
@@ -450,42 +485,9 @@
                         }
                     }
                 }
-            },
-            "delete": {
-                "description": "Delete a schedule by its ID",
-                "tags": [
-                    "schedules"
-                ],
-                "summary": "Delete a schedule",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Schedule ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/chronospace-be_internal_models.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/chronospace-be_internal_models.ErrorResponse"
-                        }
-                    }
-                }
             }
         },
-        "/services": {
+        "/v1/api/services": {
             "get": {
                 "description": "Get all services",
                 "consumes": [
@@ -555,7 +557,7 @@
                 }
             }
         },
-        "/services/{id}": {
+        "/v1/api/services/{id}": {
             "get": {
                 "description": "Get service by ID",
                 "consumes": [

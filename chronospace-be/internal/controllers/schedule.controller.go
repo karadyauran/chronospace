@@ -28,7 +28,7 @@ func NewScheduleController(scheduleService services.ScheduleService) *ScheduleCo
 // @Param schedule body models.CreateScheduleRequest true "Schedule details"
 // @Success 201 {object} models.ScheduleResponse
 // @Failure 400 {object} models.ErrorResponse
-// @Router /schedules [post]
+// @Router /v1/api/schedules [post]
 func (c *ScheduleController) CreateSchedule(ctx *gin.Context) {
 	var req models.CreateScheduleRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -53,7 +53,7 @@ func (c *ScheduleController) CreateSchedule(ctx *gin.Context) {
 // @Param id path string true "Schedule ID"
 // @Success 200 {object} models.ScheduleResponse
 // @Failure 404 {object} models.ErrorResponse
-// @Router /schedules/{id} [get]
+// @Router /v1/api/schedules/{id} [get]
 func (c *ScheduleController) GetSchedule(ctx *gin.Context) {
 	var id pgtype.UUID
 	if err := id.Scan(ctx.Param("id")); err != nil {
@@ -76,7 +76,7 @@ func (c *ScheduleController) GetSchedule(ctx *gin.Context) {
 // @Tags schedules
 // @Produce json
 // @Success 200 {array} models.ScheduleResponse
-// @Router /schedules [get]
+// @Router /v1/api/schedules [get]
 func (c *ScheduleController) ListSchedules(ctx *gin.Context) {
 	schedules, err := c.scheduleService.ListSchedules(ctx)
 	if err != nil {
@@ -97,7 +97,7 @@ func (c *ScheduleController) ListSchedules(ctx *gin.Context) {
 // @Param schedule body models.UpdateScheduleRequest true "Schedule details"
 // @Success 200 {object} models.ScheduleResponse
 // @Failure 400,404 {object} models.ErrorResponse
-// @Router /schedules/{id} [put]
+// @Router /v1/api/schedules/{id} [put]
 func (c *ScheduleController) UpdateSchedule(ctx *gin.Context) {
 	var id pgtype.UUID
 	if err := id.Scan(ctx.Param("id")); err != nil {

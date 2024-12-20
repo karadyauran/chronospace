@@ -23,7 +23,42 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/bookings": {
+        "/schedules/{id}": {
+            "delete": {
+                "description": "Delete a schedule by its ID",
+                "tags": [
+                    "schedules"
+                ],
+                "summary": "Delete a schedule",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Schedule ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/chronospace-be_internal_models.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/chronospace-be_internal_models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/api/bookings": {
             "get": {
                 "description": "Get all bookings",
                 "consumes": [
@@ -100,7 +135,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/bookings/user": {
+        "/v1/api/bookings/user": {
             "get": {
                 "description": "Get all bookings for the authenticated user",
                 "consumes": [
@@ -147,7 +182,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/bookings/{id}": {
+        "/v1/api/bookings/{id}": {
             "get": {
                 "description": "Get booking by ID",
                 "consumes": [
@@ -281,7 +316,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/maps/search": {
+        "/v1/api/maps/search": {
             "get": {
                 "description": "Search for places using Google Maps API",
                 "consumes": [
@@ -311,7 +346,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/schedules": {
+        "/v1/api/schedules": {
             "get": {
                 "description": "Get a list of all schedules",
                 "produces": [
@@ -372,7 +407,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/schedules/{id}": {
+        "/v1/api/schedules/{id}": {
             "get": {
                 "description": "Get schedule details by its ID",
                 "produces": [
@@ -456,42 +491,9 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
-            "delete": {
-                "description": "Delete a schedule by its ID",
-                "tags": [
-                    "schedules"
-                ],
-                "summary": "Delete a schedule",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Schedule ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/chronospace-be_internal_models.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/chronospace-be_internal_models.ErrorResponse"
-                        }
-                    }
-                }
             }
         },
-        "/services": {
+        "/v1/api/services": {
             "get": {
                 "description": "Get all services",
                 "consumes": [
@@ -561,7 +563,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/services/{id}": {
+        "/v1/api/services/{id}": {
             "get": {
                 "description": "Get service by ID",
                 "consumes": [

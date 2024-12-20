@@ -231,7 +231,30 @@ info:
   title: Chronospace API
   version: "1.0"
 paths:
-  /bookings:
+  /schedules/{id}:
+    delete:
+      description: Delete a schedule by its ID
+      parameters:
+      - description: Schedule ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/chronospace-be_internal_models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/chronospace-be_internal_models.ErrorResponse'
+      summary: Delete a schedule
+      tags:
+      - schedules
+  /v1/api/bookings:
     get:
       consumes:
       - application/json
@@ -282,7 +305,7 @@ paths:
       summary: Create booking
       tags:
       - Booking
-  /bookings/{id}:
+  /v1/api/bookings/{id}:
     delete:
       consumes:
       - application/json
@@ -371,7 +394,7 @@ paths:
       summary: Update booking
       tags:
       - Booking
-  /bookings/user:
+  /v1/api/bookings/user:
     get:
       consumes:
       - application/json
@@ -402,7 +425,7 @@ paths:
       summary: List user bookings
       tags:
       - Booking
-  /maps/search:
+  /v1/api/maps/search:
     get:
       consumes:
       - application/json
@@ -422,7 +445,7 @@ paths:
       summary: Search places
       tags:
       - Maps
-  /schedules:
+  /v1/api/schedules:
     get:
       description: Get a list of all schedules
       produces:
@@ -462,29 +485,7 @@ paths:
       summary: Create a new schedule
       tags:
       - schedules
-  /schedules/{id}:
-    delete:
-      description: Delete a schedule by its ID
-      parameters:
-      - description: Schedule ID
-        in: path
-        name: id
-        required: true
-        type: string
-      responses:
-        "204":
-          description: No Content
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/chronospace-be_internal_models.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/chronospace-be_internal_models.ErrorResponse'
-      summary: Delete a schedule
-      tags:
-      - schedules
+  /v1/api/schedules/{id}:
     get:
       description: Get schedule details by its ID
       parameters:
@@ -541,7 +542,7 @@ paths:
       summary: Update a schedule
       tags:
       - schedules
-  /services:
+  /v1/api/services:
     get:
       consumes:
       - application/json
@@ -587,7 +588,7 @@ paths:
       summary: Create service
       tags:
       - Service
-  /services/{id}:
+  /v1/api/services/{id}:
     delete:
       consumes:
       - application/json

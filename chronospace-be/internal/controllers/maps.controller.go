@@ -24,7 +24,7 @@ func NewMapsController(mapsService *services.MapsService) *MapsController {
 // @Produce json
 // @Param query query string true "Search query"
 // @Success 200 {object} interface{}
-// @Router /maps/search [get]
+// @Router /v1/api/maps/search [get]
 func (c *MapsController) SearchPlaces(ctx *gin.Context) {
 	query := ctx.Query("query")
 	if query == "" {

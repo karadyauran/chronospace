@@ -27,7 +27,7 @@ func NewServiceController(serviceService services.ServiceService) *ServiceContro
 // @Param service body models.CreateServiceRequest true "Service details"
 // @Success 201 {object} models.ServiceResponse
 // @Failure 400 {object} models.ErrorResponse
-// @Router /services [post]
+// @Router /v1/api/services [post]
 func (c *ServiceController) CreateService(ctx *gin.Context) {
 	var req models.CreateServiceRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -52,7 +52,7 @@ func (c *ServiceController) CreateService(ctx *gin.Context) {
 // @Param id path string true "Service ID"
 // @Success 200 {object} models.ServiceResponse
 // @Failure 400,404 {object} models.ErrorResponse
-// @Router /services/{id} [get]
+// @Router /v1/api/services/{id} [get]
 func (c *ServiceController) GetService(ctx *gin.Context) {
 	id, err := utils.ParseUUID(ctx.Param("id"))
 	if err != nil {
@@ -78,7 +78,7 @@ func (c *ServiceController) GetService(ctx *gin.Context) {
 // @Param service body models.UpdateServiceRequest true "Service details"
 // @Success 200 {object} models.ServiceResponse
 // @Failure 400,404 {object} models.ErrorResponse
-// @Router /services/{id} [put]
+// @Router /v1/api/services/{id} [put]
 func (c *ServiceController) UpdateService(ctx *gin.Context) {
 	id, err := utils.ParseUUID(ctx.Param("id"))
 	if err != nil {
@@ -109,7 +109,7 @@ func (c *ServiceController) UpdateService(ctx *gin.Context) {
 // @Param id path string true "Service ID"
 // @Success 204 "No Content"
 // @Failure 400,404 {object} models.ErrorResponse
-// @Router /services/{id} [delete]
+// @Router /v1/api/services/{id} [delete]
 func (c *ServiceController) DeleteService(ctx *gin.Context) {
 	id, err := utils.ParseUUID(ctx.Param("id"))
 	if err != nil {
@@ -132,7 +132,7 @@ func (c *ServiceController) DeleteService(ctx *gin.Context) {
 // @Produce json
 // @Success 200 {array} models.ServiceResponse
 // @Failure 400 {object} models.ErrorResponse
-// @Router /services [get]
+// @Router /v1/api/services [get]
 func (c *ServiceController) ListServices(ctx *gin.Context) {
 	services, err := c.serviceService.ListServices(ctx)
 	if err != nil {
