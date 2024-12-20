@@ -281,6 +281,36 @@ const docTemplate = `{
                 }
             }
         },
+        "/maps/search": {
+            "get": {
+                "description": "Search for places using Google Maps API",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Maps"
+                ],
+                "summary": "Search places",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Search query",
+                        "name": "query",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/schedules": {
             "get": {
                 "description": "Get a list of all schedules",
